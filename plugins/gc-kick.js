@@ -1,0 +1,48 @@
+var handler = async (m, { conn, participants, usedPrefix, command }) => {
+  if (!m.isGroup) return conn.reply(m.chat, '❌ Este comando solo funciona en grupos.', m)
+
+  const groupMetadata = await conn.groupMetadata(m.chat)
+  const isAdmin = groupMetadata.participants.some(p => p.id === m.sender && p.admin)
+  const ownerGroup = groupMetadata.owner || m.chat.split`-`[0] + '@s.whatsapp.net'
+  const ownerBot = global.owner?.[0]?.[0] + '@s.whatsapp.net'
+
+  if (!isAdmin)
+    return conn.reply(m.chat, '❌ Solo los administradores pueden usar este comando.', m)
+
+  const user = m.mentionedJid?.[0] || m.quoted?.sender
+  if (!user)
+    return conn.reply(m.chat, '> _Responde un mensaje o etiqueta a la persona que quieres expulsar._', m)
+
+  if (user === conn.user.jid)
+    return conn.reply(m.chat, '⛔ No puedo eliminarme del grupo.', m)
+
+  if (user === ownerGroup)
+    return conn.reply(m.chat, '⛔ No puedo expulsar al propietario del grupo.', m)
+
+  if (user === ownerBot)
+    return conn.reply(m.chat, '⛔ No puedo expulsar al propietario del bot.', m)
+
+  try {
+    await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: `✅ Se expulsó a @${user.split('@')[0]}`,
+        mentions: [user]
+      },
+      { quoted: m }
+    )
+  } catch (e) {
+    console.error('Error al expulsar:', e)
+    return conn.reply(m.chat, `❌ Error al expulsar al usuario: ${e.message}`, m)
+  }
+}
+
+handler.help = ['kick']
+handler.tags = ['grupo']
+handler.command = ['kick', 'ban']
+handler.group = true
+handler.admin = true
+handler.botAdmin = true
+
+export default handler

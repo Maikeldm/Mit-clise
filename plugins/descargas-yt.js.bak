@@ -1,0 +1,174 @@
+import fetch from 'node-fetch'
+import axios from 'axios'
+import fs from 'fs'
+import path from 'path'
+import { execSync } from 'child_process'
+import yts from 'yt-search'
+
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  const q = text.trim()
+  const from = m.chat
+
+  if (!q) return conn.sendMessage(from, { text: `*Ejemplo:* ${usedPrefix + command} "nombre o link de YouTube"` }, { quoted: m })
+
+  try {
+    await m.react('⏳')
+
+    let url = q
+    let title, views, duration, description, thumb
+
+    // Si es texto, se busca
+    if (!q.includes('youtube.com') && !q.includes('youtu.be')) {
+      try {
+        const search = await fetch(`https://api.nexfuture.com.br/api/pesquisas/youtube?query=${encodeURIComponent(q)}`)
+        const json = await search.json()
+        const res = json.resultado
+        if (!res?.url) throw new Error('Nexfuture no encontró nada')
+
+        url = res.url
+        title = res.titulo
+        views = res.views
+        duration = res.duracao
+        description = res.descricao || '-'
+        thumb = res.imagem
+      } catch {
+        const ytres = await yts(q)
+        const vid = ytres.videos[0]
+        if (!vid) throw 'No se encontró nada'
+
+        url = vid.url
+        title = vid.title
+        views = vid.views
+        duration = vid.timestamp
+        description = vid.description || '-'
+        thumb = vid.thumbnail
+      }
+    }
+
+    const safeDesc = description || '-'
+    const caption = `*Pedido solicitado por:* *@${m.sender.split('@')[0]}*\n
+> 🎬 *Título:* ${title}
+> ღ *Vistas:* ${views?.toLocaleString?.() || '-'}
+> ⏱️ *Duración:* ${duration}
+> ✎ *Descripción:* ${safeDesc.length > 300 ? safeDesc.slice(0, 300) + '...' : safeDesc}
+
+_*By: 𝕮𝖍𝖔𝖈𝖔𝖕𝖑𝖚𝖘*_`
+
+    const thumbBuffer = await (await axios.get(thumb, { responseType: 'arraybuffer' })).data
+
+    await conn.sendMessage(from, {
+      image: thumbBuffer,
+      caption,
+      contextInfo: { mentionedJid: [m.sender] }
+    }, { quoted: m })
+
+    if (command === 'ytmp3' || command === 'yta') {
+      let downloadUrl
+
+      try {
+  const res = await fetch(`https://api.nexfuture.com.br/api/downloads/youtube/mp3/v3?url=${encodeURIComponent(url)}`)
+  const json = await res.json()
+  downloadUrl = json.download?.downloadLink
+  console.log('[AUDIO] Nexfuture URL:', downloadUrl)
+}
+
+catch (e) {
+  console.log('[AUDIO] Nexfuture falló:', e.message)
+}
+
+// Si Nexfuture no devolvió nada, intenta Cloudkutube
+if (!downloadUrl || !/^https?:\/\//.test(downloadUrl)) {
+  try {
+    const res = await fetch(`https://cloudkutube.eu/api/yta?url=${encodeURIComponent(url)}`)
+    const json = await res.json()
+    downloadUrl = json.result?.url
+    console.log('[AUDIO] Cloudkutube URL:', downloadUrl)
+  } catch (e) {
+    console.log('[AUDIO] Cloudkutube falló:', e.message)
+  }
+}
+
+if (!downloadUrl || !/^https?:\/\//.test(downloadUrl)) {
+  throw new Error('No se pudo obtener ninguna URL válida de descarga de audio')
+}
+
+      const filePath = path.join('./temp', `audio-${Date.now()}.mp3`)
+      const outputPath = path.join('./temp', `audio-${Date.now()}.opus`)
+
+      const writer = fs.createWriteStream(filePath)
+      const audioStream = await axios({ url: downloadUrl, method: 'GET', responseType: 'stream' })
+      audioStream.data.pipe(writer)
+
+      await new Promise((resolve, reject) => {
+        writer.on('finish', resolve)
+        writer.on('error', reject)
+      })
+
+      execSync(`ffmpeg -i "${filePath}" -c:a libopus -b:a 128k "${outputPath}"`)
+
+      await conn.sendMessage(from, {
+        audio: fs.readFileSync(outputPath),
+        mimetype: 'audio/ogg; codecs=opus',
+        ptt: false
+      }, { quoted: m })
+
+      fs.unlinkSync(filePath)
+      fs.unlinkSync(outputPath)
+
+    } else if (command === 'ytmp4' || command === 'ytv' || command === 'ytmp4doc') {
+      let downloadUrl
+
+      try {
+        const res = await fetch(`https://cloudkutube.eu/api/ytv?url=${encodeURIComponent(url)}`)
+        const json = await res.json()
+        downloadUrl = json.result?.url
+        console.log('[VIDEO] Cloudkutube URL:', downloadUrl)
+        if (!downloadUrl || !/^https?:\/\//.test(downloadUrl)) throw new Error('URL de video no válida (Cloudkutube)')
+      } catch {
+        const backups = [
+          `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`,
+          `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
+          `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
+          `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`
+        ]
+
+        for (const src of backups) {
+          try {
+            const res = await axios.get(src)
+            const { data, result, downloads } = res.data
+            downloadUrl = data?.dl || result?.download?.url || downloads?.url || data?.download?.url
+            console.log(`[VIDEO] Backup URL encontrada: ${downloadUrl}`)
+            if (downloadUrl) break
+          } catch (e) {
+            console.log(`Fuente falló: ${src}`)
+          }
+        }
+
+        if (!downloadUrl || !/^https?:\/\//.test(downloadUrl)) {
+          throw new Error('URL de video no válida (respaldo)')
+        }
+      }
+
+      await conn.sendMessage(from, {
+        video: { url: downloadUrl },
+        fileName: `${title}.mp4`,
+        mimetype: 'video/mp4',
+        caption: `🎬 ${title}\n⏱️ ${duration}`,
+        thumbnail: thumbBuffer
+      }, { quoted: m })
+    }
+
+    await m.react('✅')
+
+  } catch (err) {
+    console.error(err)
+    conn.reply(m.chat, `❌ Error: ${err.message || err}`, m)
+  }
+}
+
+handler.command = ['ytmp3', 'yta', 'ytmp4', 'ytv', 'ytmp4doc']
+handler.tags = ['downloader']
+handler.help = ['ytmp3', 'ytmp4']
+handler.limit = 6
+
+export default handler

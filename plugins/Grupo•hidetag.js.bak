@@ -1,0 +1,49 @@
+// comando/tag.js
+var handler = async (m, { conn, text }) => {
+  if (!m.isGroup) 
+    return conn.sendMessage(m.chat, { text: 'Este comando solo funciona en grupos.' }, { quoted: m });
+
+  let groupMetadata = await conn.groupMetadata(m.chat);
+  let participants = groupMetadata.participants;
+  let sender = m.sender;
+  let yourNumber = '593969533280@s.whatsapp.net';
+
+  let isAdmin = participants.find(p => p.id === sender)?.admin;
+  if (!isAdmin && sender !== yourNumber)
+    return conn.sendMessage(m.chat, { text: 'Este comando solo lo pueden usar los administradores y el propietario del bot.' }, { quoted: m });
+
+  let mencionado = participants.map(p => p.id);
+
+  // Si responde a un mensaje
+  if (m.quoted) {
+    let type = m.quoted.mtype;
+    if (['conversation', 'extendedTextMessage'].includes(type)) {
+      await conn.sendMessage(m.chat, { text: m.quoted.text, mentions: mencionado });
+    } else if (['imageMessage', 'videoMessage', 'stickerMessage', 'audioMessage'].includes(type)) {
+      await conn.sendMessage(m.chat, { forward: m.quoted.fakeObj, mentions: mencionado });
+    } else {
+      return conn.sendMessage(m.chat, { text: 'No puedo reenviar este tipo de mensaje.' });
+    }
+  } else if (m.message?.imageMessage || m.message?.videoMessage) {
+    // Si el mensaje contiene imagen o video más texto
+    let caption = m.message?.imageMessage?.caption || m.message?.videoMessage?.caption || '';
+    await conn.sendMessage(m.chat, {
+      forward: m,
+      mentions: mencionado,
+      caption
+    });
+  } else {
+    // Solo texto sin multimedia
+    let mensaje = text.trim() || '👻';
+    await conn.sendMessage(m.chat, { text: mensaje, mentions: mencionado });
+  }
+}
+
+handler.help = ['tag']
+handler.tags = ['grupo']
+handler.command = ['tag']
+handler.group = true
+handler.admin = true
+handler.botAdmin = true
+
+export default handler

@@ -1,0 +1,31 @@
+import axios from 'axios'
+import fs from 'fs'
+
+let handler = async (m, { conn, participants }) => {
+  const from = m.chat
+  const isAdmins = participants.find(p => p.id === m.sender)?.admin || false
+  const isBot = participants.find(p => p.id === conn.user.jid)?.admin || false
+  const isAdminModeEnabled = global.adminModeData?.[from]?.adminMode || false
+
+  if (isAdminModeEnabled && !isAdmins) {
+    return conn.sendMessage(from, { text: '> Este comando solo está disponible para administradores.' }, { quoted: m })
+  }
+
+  if (!isBot) return // El bot debe ser admin
+
+  try {
+    const { data } = await axios.get('https://waifu.pics/api/nsfw/neko')
+    const res = await axios.get(data.url, { responseType: 'arraybuffer' })
+    await conn.sendMessage(from, { image: res.data }, { quoted: m })
+  } catch (e) {
+    console.error('Error en hentai:', e)
+    await conn.sendMessage(from, { text: '❌ Error al obtener imagen hentai.' }, { quoted: m })
+  }
+}
+
+handler.command = ['hentai']
+handler.tags = ['nsfw']
+handler.group = true
+handler.register = true
+
+export default handler
