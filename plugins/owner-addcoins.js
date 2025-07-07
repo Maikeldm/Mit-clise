@@ -1,5 +1,6 @@
 import db from '../lib/database.js';
-import MessageType from '@whiskeysockets/baileys';
+// import { ... } from '@whiskeysockets/baileys'
+import { /* lo que usabas */ } from 'baron-baileys-v2'
 
 let impts = 0;
 

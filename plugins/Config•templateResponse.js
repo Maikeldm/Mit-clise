@@ -1,6 +1,7 @@
-// @type {import('@whiskeysockets/baileys')}
+// import { ... } from '@whiskeysockets/baileys'
+import { /* lo que usabas */ } from 'baron-baileys-v2'
 
-const { proto, generateWAMessage, areJidsSameUser, decryptPollVote, } = (await import('@whiskeysockets/baileys')).default;
+const { proto, generateWAMessage, areJidsSameUser, decryptPollVote, } = (await import('baron-baileys-v2')).default;
 export async function all(m, chatUpdate) {
 if (m.isBaileys) {
 return
@@ -93,7 +94,7 @@ this.ev.emit('messages.upsert', msg)
   proto,
   generateWAMessage,
   areJidsSameUser
-} = (await import('@whiskeysockets/baileys')).default
+} = (await import('baron-baileys-v2')).default
 export async function all(m, chatUpdate) {
   try {
     if (m.isBaileys) return

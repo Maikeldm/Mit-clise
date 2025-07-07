@@ -1,4 +1,4 @@
-import { areJidsSameUser } from '@whiskeysockets/baileys'
+import { areJidsSameUser } from 'baron-baileys-v2'
 
 // Regex para detectar enlaces
 const linkRegex = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i

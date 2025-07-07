@@ -17,20 +17,36 @@ if (!img || typeof img !== 'object') return m.reply('No se pudo descargar el arc
 const tmpDir = '/home/container/tmp'
 if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true })
 
-if (!img) return conn.reply(m.chat, `👻 *! La conversación no pudo completarse. Por favor, envía primero una imagen, video o gif, y luego utiliza el comando nuevamente._*`, m, )
+if (!img) return conn.reply(m.chat, `👻 *¡La conversión no pudo completarse. Por favor, envía primero una imagen, video o gif, y luego utiliza el comando nuevamente.*`, m)
 
 let out
 try {
-stiker = await sticker(img, false, global.packsticker, global.author)
+stiker = await sticker(img, false, global.packsticker, global.author, {
+    packname: global.packsticker,
+    author: global.author,
+    categories: ['🤩', '🎉'],
+    id: '12345',
+    quality: 70,
+    width: 512,
+    height: 512
+})
 } catch (e) {
 console.error(e)
 } finally {
 if (!stiker) {
-if (/webp/g.test(mime)) out = await webp2png(img)
-else if (/image/g.test(mime)) out = await uploadImage(img)
-else if (/video/g.test(mime)) out = await uploadFile(img)
-if (typeof out !== 'string') out = await uploadImage(img)
-stiker = await sticker(false, out, global.packsticker, global.author)
+    if (/webp/g.test(mime)) out = await webp2png(img)
+    else if (/image/g.test(mime)) out = await uploadImage(img)
+    else if (/video/g.test(mime)) out = await uploadFile(img)
+    if (typeof out !== 'string') out = await uploadImage(img)
+    stiker = await sticker(false, out, global.packsticker, global.author, {
+        packname: global.packsticker,
+        author: global.author,
+        categories: ['🤩', '🎉'],
+        id: '12345',
+        quality: 70,
+        width: 512,
+        height: 512
+    })
 }}
 } else if (args[0]) {
 if (isUrl(args[0])) stiker = await sticker(false, args[0], global.packsticker, global.author)

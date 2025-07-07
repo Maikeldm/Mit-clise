@@ -20,4 +20,4 @@ handler.tags = ['jadibot']
 handler.private = true
 handler.register = true
 
-export default handler 
+export default handler

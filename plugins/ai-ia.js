@@ -22,7 +22,7 @@ await conn.reply(m.chat, description, m, )
 console.error(' Error al analizar la imagen:', error)
 await conn.reply(m.chat, 'Error al analizar la imagen.', m, )}
 } else {
-if (!text) { return conn.reply(m.chat, `*Ingrese su petición*\n *Ejemplo de uso:* ${usedPrefix + command} Como hacer un avión de papel`, m, )}
+if (!text) { return conn.reply(m.chat, `*Ingrese su petición*\n *Ejemplo de uso:* ${usedPrefix + command} Como hacer un avión de papel`, m,rcanal, )}
 await m.react('💬')
 try {
 const query = text

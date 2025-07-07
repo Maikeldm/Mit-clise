@@ -18,13 +18,13 @@
         "eslint": "eslint .",
         "eslintfix": "eslint --fix ."
     },
-    "homepage": "https://github.com/thecarlos19/black-clover-MD",
+    "homepage": "https://githu",
     "author": {
-        "name": "The Carlos"
+        "name": "Maikel"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/thecarlos19/black-clover-MD.git"
+        "url": "git+https://github.com/weboz"
     },
     "bugs": {
         "url": "https://github.com/thecarlos19/black-clover-MD/issues"
@@ -38,7 +38,7 @@
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "@ibaraki-douji/pixivts": "^2.4.1",
         "@vitalets/google-translate-api": "^8.0.0",
-        "@whiskeysockets/baileys": "GataNina-Li/Baileys",
+        "baron-baileys-v2": "github:Barons-Team/baron-baileys-v2",
         "@xct007/frieren-scraper": "^0.0.2",
         "acrcloud": "^1.4.0",
         "api-dylux": "^1.7.2",
@@ -63,7 +63,7 @@
         "hispamemes": "^1.0.7",
         "human-readable": "^0.2.1",
         "instagram-url-direct": "^1.0.13",
-        "jimp": "^0.16.1",
+        "jimp": "^0.22.12",
         "jsdom": "^20.0.1",
         "link-preview-js": "^3.0.0",
         "lodash": "^4.17.21",
@@ -102,6 +102,6 @@
     },
     "optionalDependencies": {
         "moment-timezone": "^0.5.37",
-        "wa-sticker-formatter": "^4.3.2"
+        "wa-sticker-formatter": "5.0.2"
     }
 }

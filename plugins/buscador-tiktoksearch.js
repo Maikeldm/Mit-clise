@@ -1,5 +1,5 @@
 import axios from 'axios'
-const {proto, generateWAMessageFromContent, prepareWAMessageMedia, generateWAMessageContent, getDevice} = (await import("@whiskeysockets/baileys")).default
+const {proto, generateWAMessageFromContent, prepareWAMessageMedia, generateWAMessageContent, getDevice} = (await import('baron-baileys-v2')).default
 
 let handler = async (message, { conn, text, usedPrefix, command }) => {
 if (!text) return conn.reply(message.chat, `*Por favor, ingrese lo que desea buscar en tiktok.*`, message)

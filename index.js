@@ -26,19 +26,18 @@ import {makeWASocket, protoType, serialize} from './lib/simple.js'
 import {Low, JSONFile} from 'lowdb'
 import {mongoDB, mongoDBV2} from './lib/mongoDB.js'
 import store from './lib/store.js'
-const {proto} = (await import('@whiskeysockets/baileys')).default
+const {proto} = (await import('baron-baileys-v2')).default
 import pkg from 'google-libphonenumber'
 const { PhoneNumberUtil } = pkg
 const phoneUtil = PhoneNumberUtil.getInstance()
-const {DisconnectReason, useMultiFileAuthState, MessageRetryMap, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser} = await import('@whiskeysockets/baileys')
+const {DisconnectReason, useMultiFileAuthState, MessageRetryMap, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, jidNormalizedUser} = await import('baron-baileys-v2')
 import readline, { createInterface } from 'readline'
 import NodeCache from 'node-cache'
 const {CONNECTING} = ws
 const {chain} = lodash
 const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
 
-//const yuw = dirname(fileURLToPath(import.meta.url))
-//let require = createRequire(megu)
+//... (código de cfonts y configuración inicial)
 let { say } = cfonts
 
 console.log(chalk.bold.redBright(`\nIniciando 𝖈𝖍𝖔𝖈𝖔𝖕𝖑𝖚𝖘\n`))
@@ -104,6 +103,10 @@ global.db.chain = chain(global.db.data)
 }
 loadDatabase()
 
+// Asegúrate de que estas variables globales estén definidas en config.js
+if (!global.jadi) global.jadi = 'mitJadibot';
+if (!global.sessions) global.sessions = 'Mitsesions';
+
 const {state, saveState, saveCreds} = await useMultiFileAuthState(global.sessions)
 const msgRetryCounterMap = (MessageRetryMap) => { };
 const msgRetryCounterCache = new NodeCache()
@@ -123,13 +126,13 @@ let opcion
 if (methodCodeQR) {
 opcion = '1'
 }
-if (!methodCodeQR && !methodCode && !fs.existsSync(`./${sessions}/creds.json`)) {
+if (!methodCodeQR && !methodCode && !fs.existsSync(`./${global.sessions}/creds.json`)) {
 do {
 opcion = await question(colores('⌨ Seleccione una opción:\n') + opcionQR('1. Con código QR\n') + opcionTexto('2. Con código de texto de 8 dígitos\n--> '))
 
 if (!/^[1-2]$/.test(opcion)) {
 console.log(chalk.bold.redBright(`✞ No se permiten numeros que no sean 1 o 2, tampoco letras o símbolos especiales.`))
-}} while (opcion !== '1' && opcion !== '2' || fs.existsSync(`./${sessions}/creds.json`))
+}} while (opcion !== '1' && opcion !== '2' || fs.existsSync(`./${global.sessions}/creds.json`))
 } 
 
 console.info = () => {} 
@@ -159,7 +162,7 @@ version,
 
 global.conn = makeWASocket(connectionOptions);
 
-if (!fs.existsSync(`./${sessions}/creds.json`)) {
+if (!fs.existsSync(`./${global.sessions}/creds.json`)) {
 if (opcion === '2' || methodCode) {
 opcion = '2'
 if (!conn.authState.creds.registered) {
@@ -186,58 +189,49 @@ console.log(chalk.bold.white(chalk.bgMagenta(`✞ CÓDIGO DE VINCULACIÓN ✞`))
 
 conn.isInit = false;
 conn.well = false;
-//conn.logger.info(`✞  H E C H O\n`)
 
 if (!opts['test']) {
 if (global.db) setInterval(async () => {
 if (global.db.data) await global.db.write()
-if (opts['autocleartmp'] && (global.support || {}).find) (tmp = [os.tmpdir(), 'tmp', `${jadi}`], tmp.forEach((filename) => cp.spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete'])));
 }, 30 * 1000);
 }
 
-// if (opts['server']) (await import('./server.js')).default(global.conn, PORT);
-
 async function connectionUpdate(update) {
-const {connection, lastDisconnect, isNewLogin} = update;
-global.stopped = connection;
-if (isNewLogin) conn.isInit = true;
-const code = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode;
-if (code && code !== DisconnectReason.loggedOut && conn?.ws.socket == null) {
-await global.reloadHandler(true).catch(console.error);
-global.timestamp.connect = new Date;
-}
-if (global.db.data == null) loadDatabase();
-if (update.qr != 0 && update.qr != undefined || methodCodeQR) {
-if (opcion == '1' || methodCodeQR) {
-console.log(chalk.bold.yellow(`\n❐ QR EXPIRA EN 45 SEGUNDOS`))}
-}
-if (connection == 'open') {
-console.log(chalk.bold.green('\n 𝖈𝖍𝖔𝖈𝖔𝖕𝖑𝖚𝖘  Conectado con éxito '))
-}
-let reason = new Boom(lastDisconnect?.error)?.output?.statusCode
-if (connection === 'close') {
-if (reason === DisconnectReason.badSession) {
-console.log(chalk.bold.cyanBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
-} else if (reason === DisconnectReason.connectionClosed) {
-console.log(chalk.bold.magentaBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹\n┆ ⚠︎ CONEXION CERRADA, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹`))
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.connectionLost) {
-console.log(chalk.bold.blueBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂\n┆ ⚠︎ CONEXIÓN PERDIDA CON EL SERVIDOR, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂`))
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.connectionReplaced) {
-console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ CONEXIÓN REEMPLAZADA, SE HA ABIERTO OTRA NUEVA SESION, POR FAVOR, CIERRA LA SESIÓN ACTUAL PRIMERO.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
-} else if (reason === DisconnectReason.loggedOut) {
-console.log(chalk.bold.redBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.restartRequired) {
-console.log(chalk.bold.cyanBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓\n┆ ✧ CONECTANDO AL SERVIDOR...\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓`))
-await global.reloadHandler(true).catch(console.error)
-} else if (reason === DisconnectReason.timedOut) {
-console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸\n┆ ⧖ TIEMPO DE CONEXIÓN AGOTADO, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸`))
-await global.reloadHandler(true).catch(console.error) //process.send('reset')
-} else {
-console.log(chalk.bold.redBright(`\n⚠︎！ RAZON DE DESCONEXIÓN DESCONOCIDA: ${reason || 'No encontrado'} >> ${connection || 'No encontrado'}`))
-}}
+  const {connection, lastDisconnect, isNewLogin} = update;
+  global.stopped = connection;
+  if (isNewLogin) conn.isInit = true;
+  const code = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode;
+  if (code && code !== DisconnectReason.loggedOut && conn?.ws.socket == null) {
+    await global.reloadHandler(true).catch(console.error);
+    global.timestamp.connect = new Date;
+  }
+  if (global.db.data == null) loadDatabase();
+  if (update.qr != 0 && update.qr != undefined || methodCodeQR) {
+  if (opcion == '1' || methodCodeQR) {
+  console.log(chalk.bold.yellow(`\n❐ QR EXPIRA EN 45 SEGUNDOS`))}
+  }
+  if (connection == 'open') {
+  console.log(chalk.bold.green('\n 𝖈𝖍𝖔𝖈𝖔𝖕𝖑𝖚𝖘  Conectado con éxito '))
+  }
+  let reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+  if (connection === 'close') {
+    if ([DisconnectReason.connectionClosed, DisconnectReason.connectionLost, DisconnectReason.timedOut, DisconnectReason.restartRequired].includes(reason)) {
+      console.log(chalk.bold.yellow('Intentando reconectar el bot principal...'));
+      await global.reloadHandler(true).catch(console.error);
+      return;
+    }
+    if (reason === DisconnectReason.badSession) {
+      console.log(chalk.bold.cyanBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
+    } else if (reason === DisconnectReason.connectionReplaced) {
+      console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ CONEXIÓN REEMPLAZADA, OTRA SESIÓN ABIERTA.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
+    } else if (reason === DisconnectReason.loggedOut) {
+      console.log(chalk.bold.redBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ SESIÓN CERRADA, ELIMINE ${global.sessions} Y REINICIE.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
+      await global.reloadHandler(true).catch(console.error);
+    } else {
+      console.log(chalk.bold.redBright(`\n⚠︎ RAZON DE DESCONEXIÓN DESCONOCIDA: ${reason || 'No encontrado'}`))
+      await global.reloadHandler(true).catch(console.error);
+    }
+  }
 }
 process.on('uncaughtException', console.error)
 
@@ -269,46 +263,12 @@ conn.handler = handler.handler.bind(global.conn)
 conn.connectionUpdate = connectionUpdate.bind(global.conn)
 conn.credsUpdate = saveCreds.bind(global.conn, true)
 
-const currentDateTime = new Date()
-const messageDateTime = new Date(conn.ev)
-if (currentDateTime >= messageDateTime) {
-const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
-
-} else {
-const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
-}
-
 conn.ev.on('messages.upsert', conn.handler)
 conn.ev.on('connection.update', conn.connectionUpdate)
 conn.ev.on('creds.update', conn.credsUpdate)
 isInit = false
 return true
 };
-
-//Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
-
-global.rutaJadiBot = join(__dirname, './blackJadiBot')
-
-if (global.blackJadibts) {
-if (!existsSync(global.rutaJadiBot)) {
-mkdirSync(global.rutaJadiBot, { recursive: true }) 
-console.log(chalk.bold.cyan(`La carpeta: ${jadi} se creó correctamente.`))
-} else {
-console.log(chalk.bold.cyan(`La carpeta: ${jadi} ya está creada.`)) 
-}
-
-const readRutaJadiBot = readdirSync(rutaJadiBot)
-if (readRutaJadiBot.length > 0) {
-const creds = 'creds.json'
-for (const gjbts of readRutaJadiBot) {
-const botPath = join(rutaJadiBot, gjbts)
-const readBotPath = readdirSync(botPath)
-if (readBotPath.includes(creds)) {
-blackJadiBot({pathblackJadiBot: botPath, m: null, conn, args: '', usedPrefix: '#', command: 'serbot'})
-}
-}
-}
-}
 
 const pluginFolder = global.__dirname(join(__dirname, './plugins/index'))
 const pluginFilter = (filename) => /\.js$/.test(filename)
@@ -352,6 +312,60 @@ global.plugins = Object.fromEntries(Object.entries(global.plugins).sort(([a], [b
 Object.freeze(global.reload)
 watch(pluginFolder, global.reload)
 await global.reloadHandler()
+
+// << PASO 1: HEMOS BORRADO EL CÓDIGO ANTIGUO DE ARRANQUE DE SUB-BOTS DE AQUÍ.
+
+// << PASO 2: HEMOS PEGADO EL CÓDIGO NUEVO AQUÍ.
+// --- Arranque nativo y reconexión para sub-bots ---
+// Esta función se ejecutará después de que el bot principal se haya configurado.
+async function reconnectSubBots() {
+  const subbotDir = join(__dirname, `./${global.jadi}`);
+  console.log(chalk.bold.blueBright(`\n[SUB-BOTS] Buscando sesiones para reconectar en: ${subbotDir}`));
+
+  if (!existsSync(subbotDir)) {
+    console.log(chalk.bold.yellow(`[SUB-BOTS] El directorio de sub-bots no existe. Creándolo...`));
+    mkdirSync(subbotDir, { recursive: true });
+    return;
+  }
+
+  const sessionFolders = readdirSync(subbotDir);
+
+  if (sessionFolders.length === 0) {
+    console.log(chalk.bold.cyan('[SUB-BOTS] No se encontraron sesiones de sub-bots para reconectar.'));
+    return;
+  }
+
+  console.log(chalk.bold.green(`[SUB-BOTS] Encontradas ${sessionFolders.length} sesiones. Iniciando reconexión...`));
+
+  for (const folder of sessionFolders) {
+    const sessionPath = join(subbotDir, folder);
+    if (statSync(sessionPath).isDirectory()) {
+      const credsPath = join(sessionPath, 'creds.json');
+      if (existsSync(credsPath)) {
+        console.log(chalk.bold.cyanBright(`> Reconectando sub-bot de la sesión: ${folder}`));
+        try {
+          // Llamamos a blackJadiBot sin argumentos para que reanude la sesión
+          await blackJadiBot({
+            pathblackJadiBot: sessionPath,
+            m: null,
+            conn: global.conn, // Pasamos la conexión principal por si es necesaria
+            args: [],
+            usedPrefix: '#',
+            command: 'serbot',
+            fromCommand: false // Indicamos que no es desde un comando
+          });
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Espera 2 segundos entre cada conexión
+        } catch (e) {
+          console.error(chalk.bold.red(`[SUB-BOTS] Error al reconectar la sesión ${folder}:`), e);
+        }
+      }
+    }
+  }
+}
+// Llamar a la función de reconexión de sub-bots DESPUÉS de que el handler principal esté cargado.
+reconnectSubBots();
+
+
 async function _quickTest() {
 const test = await Promise.all([
 spawn('ffmpeg'),
@@ -377,93 +391,57 @@ const s = global.support = {ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, fi
 Object.freeze(global.support);
 }
 
+// ... (Resto de tu código de limpieza de archivos y reinicio automático)
 function clearTmp() {
 const tmpDir = join(__dirname, 'tmp')
+if (!fs.existsSync(tmpDir)) return;
 const filenames = readdirSync(tmpDir)
 filenames.forEach(file => {
 const filePath = join(tmpDir, file)
 unlinkSync(filePath)})
 }
 
-function purgeSession() {
-let prekey = []
-let directorio = readdirSync(`./${sessions}`)
-let filesFolderPreKeys = directorio.filter(file => {
-return file.startsWith('pre-key-')
-})
-prekey = [...prekey, ...filesFolderPreKeys]
-filesFolderPreKeys.forEach(files => {
-unlinkSync(`./${sessions}/${files}`)
-})
-} 
-
-function purgeSessionSB() {
-try {
-const listaDirectorios = readdirSync(`./${jadi}/`);
-let SBprekey = [];
-listaDirectorios.forEach(directorio => {
-if (statSync(`./${jadi}/${directorio}`).isDirectory()) {
-const DSBPreKeys = readdirSync(`./${jadi}/${directorio}`).filter(fileInDir => {
-return fileInDir.startsWith('pre-key-')
-})
-SBprekey = [...SBprekey, ...DSBPreKeys];
-DSBPreKeys.forEach(fileInDir => {
-if (fileInDir !== 'creds.json') {
-unlinkSync(`./${jadi}/${directorio}/${fileInDir}`)
-}})
-}})
-if (SBprekey.length === 0) {
-console.log(chalk.bold.green(`\n╭» ❍ ${jadi} ❍\n│→ NO HAY QUE ELIMINAR \n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎`))
-} else {
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ${jadi} ❍\n│→ ARCHIVOS NO ESENCIALES ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎︎`))
-}} catch (err) {
-console.log(chalk.bold.red(`\n╭» ❍ ${jadi} ❍\n│→ OCURRIÓ UN ERROR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― \n` + err))
-}}
-
-function purgeOldFiles() {
-const directories = [`./${sessions}/`, `./${jadi}/`]
-directories.forEach(dir => {
-readdirSync(dir, (err, files) => {
-if (err) throw err
-files.forEach(file => {
-if (file !== 'creds.json') {
-const filePath = path.join(dir, file);
-unlinkSync(filePath, err => {
-if (err) {
-console.log(chalk.bold.red(`\n╭» ❍ ARCHIVO ❍\n│→ ${file} NO SE PUDO BORRAR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ✘\n` + err))
-} else {
-console.log(chalk.bold.green(`\n╭» ❍ ARCHIVO ❍\n│→ ${file} BORRADO CON ÉXITO\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
-} }) }
-}) }) }) }
-
-function redefineConsoleMethod(methodName, filterStrings) {
-const originalConsoleMethod = console[methodName]
-console[methodName] = function() {
-const message = arguments[0]
-if (typeof message === 'string' && filterStrings.some(filterString => message.includes(atob(filterString)))) {
-arguments[0] = ""
-}
-originalConsoleMethod.apply(console, arguments)
-}}
-
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
 await clearTmp()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 4) // 4 min 
+console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 4) 
 
-setInterval(async () => {
-if (stopped === 'close' || !conn || !conn.user) return
-await purgeSession()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10) // 10 min
+function limpiarArchivosBasuraEnDirectorio(baseDir) {
+  if (!fs.existsSync(baseDir)) return;
+  const now = Date.now();
+  const diezMin = 10 * 60 * 1000;
+  fs.readdirSync(baseDir).forEach(fileOrDir => {
+    const fullPath = path.join(baseDir, fileOrDir);
+    try {
+      if (fileOrDir === 'creds.json') return;
+      const stats = fs.statSync(fullPath);
+      if (stats.isDirectory()) {
+        // Limpiar dentro de las subcarpetas de sesión
+        limpiarArchivosBasuraEnDirectorio(fullPath);
+      } else if (now - stats.mtimeMs > diezMin) {
+        fs.unlinkSync(fullPath);
+      }
+    } catch (e) {
+      // Ignorar errores (archivo puede haber sido eliminado por otro proceso)
+    }
+  });
+}
 
-setInterval(async () => {
-if (stopped === 'close' || !conn || !conn.user) return
-await purgeSessionSB()}, 1000 * 60 * 10) 
+// Limpieza periódica cada 10 minutos
+setInterval(() => {
+  limpiarArchivosBasuraEnDirectorio(`./${global.jadi}`); // sub-bots
+  limpiarArchivosBasuraEnDirectorio(`./${global.sessions}`); // bot principal
+  console.log(chalk.bold.cyanBright(`\n╭» ❍ SESIONES ❍\n│→ ARCHIVOS RESIDUALES DE SESIÓN ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+}, 10 * 60 * 1000);
 
-setInterval(async () => {
-if (stopped === 'close' || !conn || !conn.user) return
-await purgeOldFiles()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ARCHIVOS ❍\n│→ ARCHIVOS RESIDUALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10)
+// Reinicio automático cada 20 minutos para evitar sobrecarga
+// Elimina o comenta este bloque para evitar que se apague la consola
+/*
+setInterval(() => {
+  console.log(chalk.bold.yellow('Reiniciando el bot automáticamente para refrescar la memoria...'));
+  process.exit(1); // Usar 1 para indicar reinicio intencional
+}, 20 * 60 * 1000);
+*/
 
 _quickTest().then(() => conn.logger.info(chalk.bold(`✞ H E C H O\n`.trim()))).catch(console.error)
 

@@ -1,4 +1,4 @@
-import { areJidsSameUser } from '@whiskeysockets/baileys'
+import { /* lo que usabas */ } from 'baron-baileys-v2'
 
 var handler = async (m, { conn, text, participants, args, command }) => {
 

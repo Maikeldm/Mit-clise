@@ -182,7 +182,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       },
     ];
 
-    let img = 'https://qu.ax/zhuyO.jpg';
+    let img = 'https://qu.ax/fFbkM.jpg';
     await m.react('🤺');
 
     await conn.sendMessage(

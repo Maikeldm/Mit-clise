@@ -1,4 +1,4 @@
-const { generateWAMessageFromContent, proto } = (await import('@whiskeysockets/baileys')).default
+import { /* lo que usabas */ } from 'baron-baileys-v2'
 
 var handler = async (m, { conn, text}) => {
 

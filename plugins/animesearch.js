@@ -1,5 +1,5 @@
 import axios from 'axios';
-const baileys = (await import("@whiskeysockets/baileys")).default;
+const baileys = (await import('baron-baileys-v2')).default;
 const { proto } = baileys;
 const { generateWAMessageFromContent } = baileys;
 const { generateWAMessageContent } = baileys;

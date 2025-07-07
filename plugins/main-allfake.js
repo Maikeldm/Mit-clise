@@ -1,8 +1,9 @@
-import pkg from '@whiskeysockets/baileys'
+import pkg from 'baron-baileys-v2'
 import fs from 'fs'
 import fetch from 'node-fetch'
 import axios from 'axios'
 import moment from 'moment-timezone'
+import { /* lo que usabas */ } from 'baron-baileys-v2'
 const { generateWAMessageFromContent, prepareWAMessageMedia, proto } = pkg
 
 var handler = m => m
@@ -28,18 +29,18 @@ console.log(`Error : ${e}`)
 }}
   
 //creador y otros
-global.creador = 'Wa.me/525544876071'
+global.creador = 'Wa.me/593969533280'
 global.ofcbot = `${conn.user.jid.split('@')[0]}`
-global.asistencia = 'Wa.me/525544876071'
-global.namechannel = '⏤͟͞㋡ 𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃𝐒 '
-global.namegrupo = ' 𝕭𝖑𝖆𝖈𝖐 𝕮𝖑𝖔𝖛𝖊𝖗 ☘︎'
-global.namecomu = '𝗖𝗼𝗺𝘂𝗻𝗶𝗱𝗮𝗱 ⏤͟͞ 𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃𝐒 '
+global.asistencia = 'Wa.me/593961792672'
+global.namechannel = '⏤͟͞𝙼𝚒𝚝 𝚌𝚕𝚒𝚜𝚎 '
+global.namegrupo = ' 𝕮𝖍𝖔𝖈𝖔𝖕𝖑𝖚𝖘'
+global.namecomu = '𝗖𝗼𝗺𝘂𝗻𝗶𝗱𝗮𝗱 ⏤͟͞ 𝙼𝚒𝚝 𝚌𝚕𝚊𝚜𝚎 '
 global.listo = '*𝕮𝖍𝖔𝖈𝖔𝖕𝖑𝖚𝖘*'
 
 //Ids channel
-global.idchannel = '120363307694217288@newsletter'
-global.canalIdM = ["120363307694217288@newsletter", "120363307694217288@newsletter"]
-global.canalNombreM = ["⏤͟͞㋡ 𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃𝐒 ", "㋡ 𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃𝐒 "]
+global.idchannel = '120363386763104776@newsletter'
+global.canalIdM = ["120363386763104776@newsletter", "120363386763104776@newsletter"]
+global.canalNombreM = ["⏤͟͞𝙼𝚒𝚝 𝚌𝚕𝚊𝚜𝚎 ", "𝙼𝚒𝚝 𝚌𝚕𝚊𝚜𝚎 "]
 global.channelRD = await getRandomChannel()
 
 global.d = new Date(new Date + 3600000)
@@ -64,12 +65,12 @@ global.emojis = [emoji, emoji2, emoji3, emoji4].getRandom()
 
 
 //Enlaces
-var canal = 'https://whatsapp.com/channel/0029Vai28FR7dmea9gytQm3w'  
-let canal2 = 'https://whatsapp.com/channel/0029Vai28FR7dmea9gytQm3w'
-var git = 'https://github.com/thecarlos19' 
+var canal = 'https://whatsapp.com/channel/0029Vb2mDZ93bbUzSuMDJG1S'  
+let canal2 = 'https://whatsapp.com/channel/0029Vb2mDZ93bbUzSuMDJG1S'
+var git = 'https://github' 
 var youtube = '' 
-var github = 'https://github.com/thecarlos19/black-clover-MD' 
-let correo = 'carloscristobal30@gmail.com'
+var github = 'https://github.com' 
+let correo = 'carlos@gmail.com'
 global.redes = [canal, git, github, correo].getRandom()
 
 let category = "imagen"
@@ -96,8 +97,8 @@ global.fake = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo
 }}, { quoted: m }
 
 global.icono = [
-'https://files.catbox.moe/w7lqei.jpg',
-'https://files.catbox.moe/viji8b.jpg'
+'https://files.catbox.moe/3dqamz.jpg',
+'https://files.catbox.moe/3dqamz.jpg'
 ].getRandom()
 
 global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: packname, body: dev, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: icono, sourceUrl: redes, mediaType: 1, renderLargerThumbnail: false }, }, }}

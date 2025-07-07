@@ -1,4 +1,4 @@
-import { areJidsSameUser } from '@whiskeysockets/baileys'
+import { /* lo que usabas */ } from 'baron-baileys-v2'
 
 let handler = async (m, { conn }) => {
     if (!m.isGroup) return m.reply('❌ Este comando solo funciona en grupos')
@@ -43,4 +43,4 @@ handler.command = ['debugadmin', 'checkadmin']
 // Comentado temporalmente para permitir uso público
 // handler.rowner = true
 
-export default handler 
+export default handler

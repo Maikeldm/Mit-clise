@@ -6,11 +6,11 @@ import { unwatchFile, watchFile } from 'fs'
 import chalk from 'chalk'
 import fetch from 'node-fetch'
 import { setAdminGroup } from './lib/adminGroupsDB.js'
-import { areJidsSameUser } from '@whiskeysockets/baileys'
+import { areJidsSameUser } from 'baron-baileys-v2'
+const { proto } = (await import('baron-baileys-v2')).default
 import { readFileSync, writeFileSync } from 'fs'
 import fs from 'fs'
 
-const { proto } = (await import('@whiskeysockets/baileys')).default
 const isNumber = x => typeof x === 'number' && !isNaN(x)
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(function () {
 clearTimeout(this)
@@ -295,29 +295,29 @@ if (m.isGroup) {
   bot = participants.find(p => p.id?.split('@')[0] === botId) || {}
   
   // Log para depuración
-  console.log('Handler - Status Check:', {
-    botId,
-    bot,
-    userId: m.sender?.split('@')[0],
-    user,
-    participantsCount: participants.length,
-    admins: participants.filter(p => p.admin).map(p => ({
-      id: p.id?.split('@')[0],
-      admin: p.admin
-    }))
-  })
+  // console.log('Handler - Status Check:', {
+  //   botId,
+  //   bot,
+  //   userId: m.sender?.split('@')[0],
+  //   user,
+  //   participantsCount: participants.length,
+  //   admins: participants.filter(p => p.admin).map(p => ({
+  //     id: p.id?.split('@')[0],
+  //     admin: p.admin
+  //   }))
+  // })
   
   isRAdmin = user?.admin === 'superadmin' || false
   isAdmin = isRAdmin || user?.admin === 'admin' || false
   isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin' || false
 
   // Log adicional para verificar estados finales
-  console.log('Handler - Final Status:', {
-    isRAdmin,
-    isAdmin,
-    isBotAdmin,
-    botAdminType: bot?.admin
-  })
+  // console.log('Handler - Final Status:', {
+  //   isRAdmin,
+  //   isAdmin,
+  //   isBotAdmin,
+  //   botAdminType: bot?.admin
+  // })
 }
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')

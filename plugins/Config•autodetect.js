@@ -1,4 +1,6 @@
-let WAMessageStubType = (await import('@whiskeysockets/baileys')).default
+import { /* lo que usabas */ } from 'baron-baileys-v2'
+
+let WAMessageStubType = (await import('baron-baileys-v2')).default
 
 export async function before(m, { conn, participants, groupMetadata }) {
 if (!m.messageStubType || !m.isGroup) return
